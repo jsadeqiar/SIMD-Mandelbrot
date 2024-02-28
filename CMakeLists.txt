@@ -27,6 +27,7 @@ file(GLOB_RECURSE inc_files
 )
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     inc_files
+    include/
     ${IMGUI}
     ${IMGUI_BACKEND}
 )
