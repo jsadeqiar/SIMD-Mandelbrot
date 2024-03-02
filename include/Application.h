@@ -17,10 +17,12 @@ namespace SM
         SDL_Window* window_;
         SDL_Renderer* renderer_;
         ImGuiIO& io_; 
+        ImGuiID dockspace_id_;
         bool running_;
         bool demo_;
         
         inline void StartFrame();
+        inline void DrawDockSpace();
         void Draw();
         inline void RenderFrame();
 

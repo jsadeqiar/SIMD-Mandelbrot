@@ -58,6 +58,48 @@ namespace SM
         return;
     }
 
+    inline void Application::DrawDockSpace()
+    {
+        static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | 
+                                        ImGuiWindowFlags_NoDocking | 
+                                        ImGuiWindowFlags_NoScrollbar | 
+                                        ImGuiWindowFlags_NoMove | 
+                                        ImGuiWindowFlags_NoResize | 
+                                        ImGuiWindowFlags_NoCollapse |
+                                        ImGuiWindowFlags_NoBringToFrontOnFocus |
+                                        ImGuiWindowFlags_NoNavFocus | 
+                                        ImGuiWindowFlags_NoTitleBar;
+
+        const ImGuiViewport* viewport = ImGui::GetMainViewport();
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+        ImGui::Begin("Main Window", nullptr, window_flags); // Dockspace begin
+        if(io_.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+        {
+            dockspace_id_ = ImGui::GetID("MyDockSpace");
+            ImGui::DockSpace(dockspace_id_, ImVec2(0.0f, 0.0f), dockspace_flags);
+        }
+        if(ImGui::BeginMenuBar())
+        {
+            if(ImGui::BeginMenu("Test"))
+            {
+                ImGui::Separator();
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenuBar();
+        }
+        
+        ImGui::End();                                       // Dockspace end
+
+        
+
+        return;
+    }
+
     void Application::Draw()
     {
         while(running_)
@@ -73,31 +115,21 @@ namespace SM
             }
 
             StartFrame();
+            DrawDockSpace();
 
-            // DRAW HERE
+            // Draw within docking space under.
 
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->WorkPos);
-            ImGui::SetNextWindowSize(viewport->WorkSize);
-            ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | 
-                                            ImGuiWindowFlags_NoMove | 
-                                            ImGuiWindowFlags_NoResize | 
-                                            ImGuiWindowFlags_NoCollapse;
+            if(demo_)
+                  ImGui::ShowDemoWindow(&demo_);
+            ImGui::Begin("Main window");
+            ImGui::Checkbox("Show Demo Window", &demo_);
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io_.Framerate, io_.Framerate);
+            ImGui::End();   
 
-            //if(ImGui::Begin("Test", nullptr, window_flags))
-            //{
-                if(demo_)
-                    ImGui::ShowDemoWindow(&demo_);
-
-                {
-                ImGui::Begin("Main window");
-                ImGui::Checkbox("Show Demo Window", &demo_);
-                ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io_.Framerate, io_.Framerate);
-                ImGui::End();
-                }
-            //}
-
-            
+            ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
+            ImGui::Begin("Testing internal dockspace win", nullptr);
+            ImGui::End();
+                                        
 
             RenderFrame();
         }
