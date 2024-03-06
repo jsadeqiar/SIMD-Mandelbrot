@@ -1,4 +1,4 @@
-#include "Application.h"
+#include "../include/Application.h"
 
 namespace SM
 {
@@ -7,6 +7,7 @@ namespace SM
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
     }
+
 
     Application::Application(ImGuiIO& io) : io_(io)
     {
@@ -24,6 +25,8 @@ namespace SM
 
         SDL_SetWindowTitle(window_, "Main Window");
 
+        pixel_format_ = SDL_CreatePixelFormat(SDL_GetWindowPixelFormat(window_)); 
+
         (void)io_;
         io_.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable;
 
@@ -34,6 +37,10 @@ namespace SM
 
         running_ = true;
         demo_ = true;
+        texHeight_ = 500;
+        texWidth_ = 500;
+
+        texture_ = SDL_CreateTexture(renderer_, pixel_format_->format, SDL_TEXTUREACCESS_STREAMING, texHeight_, texWidth_); 
 
         Draw();
     }
@@ -47,6 +54,28 @@ namespace SM
         SDL_DestroyRenderer(renderer_);
         SDL_DestroyWindow(window_);
         SDL_Quit();
+    }
+
+    SDL_Texture* Application::GetTexture() const
+    {
+        return texture_;
+    }
+
+    void Application::CreateTexture(SDL_Renderer* renderer)
+    {
+        texture_ = SDL_CreateTexture(renderer, pixel_format_->format, SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_);
+        return;
+    }
+
+    void Application::UpdateTexture(const Framebuffer& fb)
+    {
+        void* texture_pixels;
+        int texture_pitch;
+        SDL_LockTexture(texture_, nullptr, &texture_pixels, &texture_pitch);
+        std::memcpy(texture_pixels, fb.GetPixelData().data(), sizeof(uint32_t) * fb.GetPixelData().size());
+        SDL_UnlockTexture(texture_);
+
+        return;    
     }
 
     inline void Application::StartFrame()
@@ -128,6 +157,7 @@ namespace SM
 
             ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
             ImGui::Begin("Testing internal dockspace win", nullptr);
+            ImGui::Image((void*)texture_, ImVec2(500, 500));
             ImGui::End();
                                         
 
