@@ -84,4 +84,42 @@ TEST_F(FramebufferTest, ColorTest)
     EXPECT_EQ(Color.a, 254);
 }
 
+TEST_F(FramebufferTest, FillBufferTest)
+{
+    SM::Framebuffer fb(100, 105, window_);
+    SM::Color Color(90, 90, 90, 255);
+
+    fb.FillBuffer(Color);
+
+    for(int i = 0; i < fb.GetHeight(); i++)
+    {
+        for(int j = 0; j < fb.GetWidth(); j++)
+        {
+            EXPECT_EQ(fb.GetPixel(i, j), Color);
+        }
+    }
+}
+
+TEST_F(FramebufferTest, GetBufferSize)
+{
+    SM::Framebuffer fb(100, 200, window_);
+    EXPECT_EQ(fb.GetBufferSize(), 20000);
+}
+
+TEST_F(FramebufferTest, ColorEquality)
+{
+    SM::Color a(100, 150, 200, 255);
+    SM::Color b(100, 150, 200, 255);
+
+    EXPECT_EQ(a, b);
+}
+
+TEST_F(FramebufferTest, ColorInequality)
+{
+    SM::Color a(100, 150, 200, 255);
+    SM::Color b(255, 255, 255, 255);
+
+    EXPECT_NE(a, b);
+}
+
 #endif

@@ -39,6 +39,11 @@ namespace SM
     {
         return width_;
     }
+
+    const int Framebuffer::GetBufferSize() const
+    {
+        return pixel_data_.size();
+    }
     
     void Framebuffer::ClearBuffer()
     {

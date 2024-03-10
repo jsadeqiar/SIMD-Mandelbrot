@@ -25,6 +25,7 @@ namespace SM
         const std::vector<uint32_t>& GetPixelData() const;
         const int GetHeight() const;
         const int GetWidth() const;
+        const int GetBufferSize() const;
         void ClearBuffer();
         void FillBuffer(Color c);
         void SetPixel(int r, int c, Color color);
