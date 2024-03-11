@@ -9,7 +9,8 @@ namespace SM
     }
 
 
-    Application::Application(ImGuiIO& io) : io_(io)
+    Application::Application(ImGuiIO& io) 
+    : io_(io)
     {
         if(SDL_Init(SDL_INIT_VIDEO) < 0)
         {
@@ -25,7 +26,8 @@ namespace SM
 
         SDL_SetWindowTitle(window_, "Main Window");
 
-        pixel_format_ = SDL_CreatePixelFormat(SDL_GetWindowPixelFormat(window_)); 
+        pixel_format_ = SDL_CreatePixelFormat(SDL_GetWindowPixelFormat(window_));
+        //pixel_format_->format = SDL_PIXELFORMAT_RGBA32; // ???
 
         (void)io_;
         io_.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard | ImGuiConfigFlags_DockingEnable;
@@ -37,10 +39,13 @@ namespace SM
 
         running_ = true;
         demo_ = true;
-        texHeight_ = 500;
-        texWidth_ = 500;
+        texHeight_ = 600;
+        texWidth_ = 1000;
 
-        texture_ = SDL_CreateTexture(renderer_, pixel_format_->format, SDL_TEXTUREACCESS_STREAMING, texHeight_, texWidth_); 
+        mandelbrot_ = Mandelbrot(texHeight_, texWidth_, pixel_format_);
+        mandelbrot_.ComputeCycle();
+
+        texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
 
         Draw();
     }
@@ -147,6 +152,8 @@ namespace SM
             DrawDockSpace();
 
             // Draw within docking space under.
+            //mandelbrot_.ComputeCycle();
+            UpdateTexture(mandelbrot_.GetFrameBuffer());
 
             if(demo_)
                   ImGui::ShowDemoWindow(&demo_);
@@ -157,7 +164,7 @@ namespace SM
 
             ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
             ImGui::Begin("Testing internal dockspace win", nullptr);
-            ImGui::Image((void*)texture_, ImVec2(500, 500));
+            ImGui::Image((void*)texture_, ImVec2(texWidth_, texHeight_));
             ImGui::End();
                                         
 

@@ -3,6 +3,15 @@
 
 namespace SM
 {
+    Framebuffer& Framebuffer::operator=(const Framebuffer& rhs)
+    {
+        pixel_data_ = rhs.pixel_data_;
+        pixel_format_ = rhs.pixel_format_;
+        height_ = rhs.height_;
+        width_ = rhs.width_;
+        return *this;
+    }
+
     Framebuffer::Framebuffer()
     {
     }
@@ -13,10 +22,9 @@ namespace SM
         pixel_data_ = std::vector<uint32_t>(width_ * height_);
     }
 
-    Framebuffer::Framebuffer(int height, int width, SDL_Window* window) 
-    : height_(height), width_(width)
+    Framebuffer::Framebuffer(int height, int width, SDL_PixelFormat* pixel_format) 
+    : height_(height), width_(width), pixel_format_(pixel_format)
     {
-        pixel_format_ = SDL_CreatePixelFormat(SDL_GetWindowPixelFormat(window));
         pixel_data_ = std::vector<uint32_t>(width_ * height_);
     }
 
@@ -52,14 +60,12 @@ namespace SM
     }
 
     void Framebuffer::FillBuffer(Color c)
-    {
-        //uint32_t RGBA = c.r | c.g | c.b | c.a;
-        //std::cout << RGBA << ' ';
-        //std::fill(pixel_data_.begin(), pixel_data_.end(), RGBA);
+    {           
         for(int i = 0; i < pixel_data_.size(); i++)
         {
             pixel_data_[i] = SDL_MapRGBA(pixel_format_, c.r, c.g, c.b, c.a);
         }
+
         return;
     }
 

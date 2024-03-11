@@ -19,9 +19,10 @@ namespace SM
     public:
         Framebuffer();
         Framebuffer(int height, int width);
-        Framebuffer(int height, int width, SDL_Window* window);
+        Framebuffer(int height, int width, SDL_PixelFormat* pixel_format);
         ~Framebuffer();
         
+        Framebuffer& operator=(const Framebuffer& rhs);
         const std::vector<uint32_t>& GetPixelData() const;
         const int GetHeight() const;
         const int GetWidth() const;

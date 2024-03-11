@@ -6,7 +6,7 @@
 #include "imgui.h"
 #include "imgui_impl_sdlrenderer3.h"
 #include "imgui_impl_sdl3.h"
-#include "./Framebuffer.h"
+#include "./Mandelbrot.h"
 
 namespace SM
 {
@@ -21,7 +21,7 @@ namespace SM
         SDL_PixelFormat* pixel_format_;
         ImGuiIO& io_; 
         ImGuiID dockspace_id_;
-        Framebuffer framebuffer_;
+        Mandelbrot mandelbrot_;
         bool running_;
         bool demo_;
         int texHeight_, texWidth_;

@@ -51,7 +51,7 @@ TEST_F(FramebufferTest, ConstructFramebuffer)
 
 TEST_F(FramebufferTest, SetPixelInBuffer)
 {
-    SM::Framebuffer fb(100, 100, window_);
+    SM::Framebuffer fb(100, 100, pixel_format_);
     SM::Color ColorSet(0xF0, 0x00, 0x0F, 0xFF);
     SM::Color ColorRes;
     std::size_t idx = 5 * 100 + 5;
@@ -86,7 +86,7 @@ TEST_F(FramebufferTest, ColorTest)
 
 TEST_F(FramebufferTest, FillBufferTest)
 {
-    SM::Framebuffer fb(100, 105, window_);
+    SM::Framebuffer fb(100, 105, pixel_format_);
     SM::Color Color(90, 90, 90, 255);
 
     fb.FillBuffer(Color);
@@ -102,7 +102,7 @@ TEST_F(FramebufferTest, FillBufferTest)
 
 TEST_F(FramebufferTest, GetBufferSize)
 {
-    SM::Framebuffer fb(100, 200, window_);
+    SM::Framebuffer fb(100, 200, pixel_format_);
     EXPECT_EQ(fb.GetBufferSize(), 20000);
 }
 
