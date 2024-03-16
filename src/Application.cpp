@@ -37,12 +37,19 @@ namespace SM
         ImGui_ImplSDL3_InitForSDLRenderer(window_, renderer_);
         ImGui_ImplSDLRenderer3_Init(renderer_);
 
+        ImGuiStyle& style = ImGui::GetStyle();
+        style.FrameBorderSize = 1.0f;
+
         running_ = true;
         demo_ = true;
         texHeight_ = 600;
         texWidth_ = 1000;
 
         mandelbrot_ = Mandelbrot(texHeight_, texWidth_, pixel_format_);
+        LIMIT_MAX_ITERATIONS_ = mandelbrot_.GetIterationLimitMax();
+        LIMIT_MIN_ITERATIONS_ = mandelbrot_.GetIterationLimitMin();
+
+        // Initial cycle for texture
         mandelbrot_.ComputeCycle();
 
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
@@ -151,14 +158,29 @@ namespace SM
             StartFrame();
             DrawDockSpace();
 
-            // Draw within docking space under.
-            //mandelbrot_.ComputeCycle();
+            if(mandelbrot_.IsStateAltered())
+                mandelbrot_.ComputeCycle();
             UpdateTexture(mandelbrot_.GetFrameBuffer());
 
             if(demo_)
                   ImGui::ShowDemoWindow(&demo_);
+            
             ImGui::Begin("Main window");
             ImGui::Checkbox("Show Demo Window", &demo_);
+            
+            ImGui::SeparatorText("Iteration Editor");
+            static int current_iterations_limit = mandelbrot_.GetCurrentIterationLimit();
+            ImGui::PushItemWidth(300);
+            if(ImGui::InputInt("Input", &current_iterations_limit, 1, 10, ImGuiInputTextFlags_EnterReturnsTrue))
+                mandelbrot_.SetCustomIteration(current_iterations_limit);
+            ImGui::SameLine(); HelpMarker(
+                "Input a desired iteration value from 2 to 1024\n"
+                "Holding the (-) and (+) increment by:\n"
+                "1 normally\n"
+                "10 with CTRL"
+            );
+            
+            ImGui::SeparatorText("Frametime/Framerate");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io_.Framerate, io_.Framerate);
             ImGui::End();   
 
@@ -183,5 +205,17 @@ namespace SM
         SDL_RenderPresent(renderer_);
 
         return;
+    }
+
+    void Application::HelpMarker(const char* desc)
+    {
+        ImGui::TextDisabled("(?)");
+        if (ImGui::BeginItemTooltip())
+        {
+            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+            ImGui::TextUnformatted(desc);
+            ImGui::PopTextWrapPos();
+            ImGui::EndTooltip();
+        }
     }
 }

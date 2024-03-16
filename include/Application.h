@@ -25,14 +25,20 @@ namespace SM
         bool running_;
         bool demo_;
         int texHeight_, texWidth_;
+        int LIMIT_MAX_ITERATIONS_;
+        int LIMIT_MIN_ITERATIONS_;
         
         SDL_Texture* GetTexture() const;
         void CreateTexture(SDL_Renderer* renderer);
         void UpdateTexture(const Framebuffer& fb);
+
         inline void StartFrame();
         inline void DrawDockSpace();
         void Draw();
         inline void RenderFrame();
+
+        // From dear imgui demo
+        void HelpMarker(const char* desc);
 
     public:
         Application(ImGuiIO& io);

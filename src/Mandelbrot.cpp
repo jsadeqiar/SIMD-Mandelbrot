@@ -35,21 +35,69 @@ namespace SM
 
     void Mandelbrot::IncreaseIterations()
     {
-        if(iterations_ < max_iterations_)
-            iterations_ <<= 1;
+        if(current_iterations_limit_ < LIMIT_MAX_ITERATIONS_)
+        {
+            current_iterations_limit_ <<= 1;
+            state_altered_ = true;
+            std::cout << "Iter++ " << current_iterations_limit_ << '\n';
+        }
+        
         return;
     }
 
     void Mandelbrot::DecreaseIterations()
     {
-        if(iterations_ > min_iterations_)
-            iterations_ >>= 1;
+        if(current_iterations_limit_ > LIMIT_MIN_ITERATIONS_)
+        {
+            current_iterations_limit_ >>= 1;
+            state_altered_ = true;
+            std::cout << "Iter-- " << current_iterations_limit_ << '\n';
+        }
+
+        return;
+    }
+
+    void Mandelbrot::SetCustomIteration(int val)
+    {
+        if(val > LIMIT_MAX_ITERATIONS_)
+            current_iterations_limit_ = LIMIT_MAX_ITERATIONS_;
+
+        else if(val < LIMIT_MIN_ITERATIONS_)
+            current_iterations_limit_ = LIMIT_MIN_ITERATIONS_;
+
+        else
+        {
+            current_iterations_limit_ = val;
+        }
+        state_altered_ = true;
+        std::cout << "Manual Iter change: " << current_iterations_limit_ << '\n';
+
         return;
     }
 
     const Framebuffer& Mandelbrot::GetFrameBuffer() const
     {
         return framebuffer_;
+    }
+
+    bool Mandelbrot::IsStateAltered() const
+    {
+        return state_altered_;
+    }
+
+    const int Mandelbrot::GetIterationLimitMax() const
+    {
+        return LIMIT_MAX_ITERATIONS_;
+    }
+
+    const int Mandelbrot::GetIterationLimitMin() const
+    {
+        return LIMIT_MIN_ITERATIONS_;
+    }
+
+    const int Mandelbrot::GetCurrentIterationLimit() const
+    {
+        return current_iterations_limit_;
     }
 
     void Mandelbrot::ComputeCycle()
@@ -69,20 +117,24 @@ namespace SM
                 // to get an appropriate progression across the range.
                 std::complex<double> c(plot_real_s_ + x * dx, plot_imag_s_ + y * dy);
                 
-                while(std::abs(z) < 2.0 && curr_iter < iterations_)
+                while(std::abs(z) < 2.0 && curr_iter < current_iterations_limit_)
                 {
                     z = (z * z) + c;
                     curr_iter++;
                 }
+
+                //int temp = (int)(255 * ((double)curr_iter / (double)iterations_));
                 
-                if(curr_iter == iterations_)
+                if(curr_iter == current_iterations_limit_)
                     framebuffer_.SetPixel(y, x, Color(0, 0, 0, 0));
 
                 else
-                    framebuffer_.SetPixel(y, x, Color(255, 255, 255, 0));
+                    framebuffer_.SetPixel(y, x, Color((int)(255 * ((double)curr_iter / (double)current_iterations_limit_)), 0, 0, 0));
             }
         }
 
+        state_altered_ = false;
+        std::cout << "Computing cycle...\n";
         return;
     }
 }
