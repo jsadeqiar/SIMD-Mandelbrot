@@ -234,6 +234,16 @@ namespace SM
         return current_iterations_limit_;
     }
 
+    const double Mandelbrot::GetWorkingRealAxisLength() const
+    {
+        return plot_real_e_ - plot_real_s_;
+    }
+
+    const double Mandelbrot::GetWorkingImagAxisLength() const
+    {
+        return plot_imag_e_ - plot_imag_s_;
+    }
+
     void Mandelbrot::ComputeCycle()
     {
         // scale the visible working region of the plot to the display width and height.

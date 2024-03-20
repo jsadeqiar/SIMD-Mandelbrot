@@ -65,6 +65,8 @@ namespace SM
         const int GetIterationLimitMax() const;
         const int GetIterationLimitMin() const;
         const int GetCurrentIterationLimit() const;
+        const double GetWorkingRealAxisLength() const;
+        const double GetWorkingImagAxisLength() const;
 
 
         void ComputeCycle();

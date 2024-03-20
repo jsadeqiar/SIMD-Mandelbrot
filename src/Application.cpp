@@ -188,7 +188,7 @@ namespace SM
             static int current_iterations_limit = mandelbrot_.GetCurrentIterationLimit();
 
             // If a +/- or "enter" of manual input, set it.
-            ImGui::PushItemWidth(300);
+            ImGui::SetNextItemWidth(300);
             if(ImGui::InputInt("Input", &current_iterations_limit, 1, 10, ImGuiInputTextFlags_EnterReturnsTrue))
                 mandelbrot_.SetCustomIteration(current_iterations_limit);
             ImGui::SameLine(); HelpMarker(
@@ -199,33 +199,39 @@ namespace SM
             );
 
             ImGui::SeparatorText("Panning & Zooming");            
-            if(ImGui::Button("NW"))
+            if(ImGui::Button("N/W"))
                 mandelbrot_.PanPlot(NORTHWEST);     ImGui::SameLine();
-            if(ImGui::Button("N"))
+            if(ImGui::Button(" N "))
                 mandelbrot_.PanPlot(NORTH);         ImGui::SameLine();
-            if(ImGui::Button("NE"))
-                mandelbrot_.PanPlot(NORTHEAST); 
+            if(ImGui::Button("N/E"))
+                mandelbrot_.PanPlot(NORTHEAST);     ImGui::SameLine(); 
             
-            ImGui::SameLine(); HelpMarker(
+            HelpMarker(
                 "Navigation can be made with W/A/S/D keys\n"
                 "Zooming in and out can be done with F and G"
             );
-
-            if(ImGui::Button("W"))
+            
+            if(ImGui::Button(" W "))
                 mandelbrot_.PanPlot(WEST);          ImGui::SameLine();
-            if(ImGui::Button("+"))
+            if(ImGui::Button("   "));
+            {};                                     ImGui::SameLine();
+            if(ImGui::Button(" E "))
+                mandelbrot_.PanPlot(EAST);          ImGui::SameLine();
+            if(ImGui::Button(" + "))
                 mandelbrot_.ZoomPlot_In();          ImGui::SameLine();
-            if(ImGui::Button("-"))
-                mandelbrot_.ZoomPlot_Out();         ImGui::SameLine();
-            if(ImGui::Button("E"))
-                mandelbrot_.PanPlot(EAST);
 
-            if(ImGui::Button("SW"))
+            ImGui::Text("Length of Working Real Axis: %.15f", mandelbrot_.GetWorkingRealAxisLength());
+
+            if(ImGui::Button("S/W"))
                 mandelbrot_.PanPlot(SOUTHWEST);     ImGui::SameLine();
-            if(ImGui::Button("S"))
+            if(ImGui::Button(" S "))
                 mandelbrot_.PanPlot(SOUTH);         ImGui::SameLine();
-            if(ImGui::Button("SE"))
-                mandelbrot_.PanPlot(SOUTHEAST);
+            if(ImGui::Button("S/E"))
+                mandelbrot_.PanPlot(SOUTHEAST);     ImGui::SameLine();
+            if(ImGui::Button(" - "))
+                mandelbrot_.ZoomPlot_Out();         ImGui::SameLine();
+            
+            ImGui::Text("Length of Working Imag Axis: %.15f", mandelbrot_.GetWorkingImagAxisLength());
             
             ImGui::SeparatorText("Frametime/Framerate");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io_.Framerate, io_.Framerate);
