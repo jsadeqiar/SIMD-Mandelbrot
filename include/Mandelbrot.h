@@ -8,6 +8,18 @@
 
 namespace SM
 {
+    enum Direction
+    {
+        NORTH       =   1 << 0,  // 0b00000001
+        SOUTH       =   1 << 1,  // 0b00000010
+        WEST        =   1 << 2,  // 0b00000100
+        EAST        =   1 << 3,  // 0b00001000
+        NORTHEAST   =   1 << 4,  // 0b00010000
+        NORTHWEST   =   1 << 5,  // 0b00100000
+        SOUTHEAST   =   1 << 6,  // 0b01000000
+        SOUTHWEST   =   1 << 7   // 0b10000000
+    };
+
     class Mandelbrot
     {
     private:
@@ -33,15 +45,27 @@ namespace SM
         Mandelbrot& operator=(const Mandelbrot& mandelbrot);
         Mandelbrot(int height, int width, SDL_PixelFormat* pixel_format);
         ~Mandelbrot();
+
+        void PanPlot(Direction dir);
+        void PanPlot_North();
+        void PanPlot_South();
+        void PanPlot_West();
+        void PanPlot_East();
+        void ZoomPlot_In();
+        void ZoomPlot_Out();
+
+        // Setters
         void IncreaseIterations();
         void DecreaseIterations();
         void SetCustomIteration(int val);
 
+        // Getters
         const Framebuffer& GetFrameBuffer() const;
         bool IsStateAltered() const;
         const int GetIterationLimitMax() const;
         const int GetIterationLimitMin() const;
         const int GetCurrentIterationLimit() const;
+
 
         void ComputeCycle();
 

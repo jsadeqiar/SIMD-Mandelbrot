@@ -33,6 +33,140 @@ namespace SM
     {
     }
 
+    void Mandelbrot::PanPlot(Direction dir)
+    {
+        switch(dir)
+        {
+            case NORTH:
+                PanPlot_North();
+                break;
+            case SOUTH:
+                PanPlot_South();
+                break;
+            case WEST:
+                PanPlot_West();
+                break;
+            case EAST:
+                PanPlot_East();
+                break;
+            case NORTHEAST:
+                PanPlot_North();
+                PanPlot_East();
+                break;
+            case NORTHWEST:
+                PanPlot_North();
+                PanPlot_West();
+                break;
+            case SOUTHEAST:
+                PanPlot_South();
+                PanPlot_East();
+                break;
+            case SOUTHWEST:
+                PanPlot_South();
+                PanPlot_West();
+                break;
+            default:
+                break;
+        }
+
+        state_altered_ = true;
+        return;
+    }
+
+    void Mandelbrot::PanPlot_North()
+    {
+        // shift total region by 20%, requires scale.
+        double total_distance_imag = plot_imag_e_ - plot_imag_s_;
+        double dy = total_distance_imag * 0.20;
+        plot_imag_s_ -= dy;
+        plot_imag_e_ -= dy;
+
+        return;
+    }
+
+    void Mandelbrot::PanPlot_South()
+    {
+        // shift total region by 20%, requires scale.
+        double total_distance_imag = plot_imag_e_ - plot_imag_s_;
+        double dy = total_distance_imag * 0.20;
+        plot_imag_s_ += dy;
+        plot_imag_e_ += dy;
+
+        return;
+    }
+
+    void Mandelbrot::PanPlot_West()
+    {
+        // shift total region by 20%, requires scale.
+        double total_distance_real = plot_real_e_ - plot_real_s_;
+        double dx = total_distance_real * 0.20;
+        plot_real_s_ -= dx;
+        plot_real_e_ -= dx;
+
+        return;
+    }
+
+    void Mandelbrot::PanPlot_East()
+    {
+        // shift total region by 20%, requires scale.
+        double total_distance_real = plot_real_e_ - plot_real_s_;
+        double dx = total_distance_real * 0.20;
+        plot_real_s_ += dx;
+        plot_real_e_ += dx;
+        
+        return;
+    }
+
+    void Mandelbrot::ZoomPlot_In()
+    {
+        // 50% zoom_factor 
+        double zoom_factor = 0.50;
+
+        // calculate midpoint of current active plot area on both axis
+        double real_midpoint = (plot_real_s_ + plot_real_e_) / 2.0;
+        double imag_midpoint = (plot_imag_s_ + plot_imag_e_) / 2.0;
+
+        // subtract the current active plot area by zoom_factor on both axis
+        plot_imag_e_ -= (plot_imag_e_ * zoom_factor);
+        plot_imag_s_ -= (plot_imag_s_ * zoom_factor);
+        plot_real_e_ -= (plot_real_e_ * zoom_factor);
+        plot_real_s_ -= (plot_real_s_ * zoom_factor);
+
+        // add the midpoints (scaled by the zoom_factor) to both axis to prevent converging to 0,0
+        plot_imag_e_ += (imag_midpoint * zoom_factor);
+        plot_imag_s_ += (imag_midpoint * zoom_factor);
+        plot_real_e_ += (real_midpoint * zoom_factor);
+        plot_real_s_ += (real_midpoint * zoom_factor);
+
+        state_altered_ = true;
+        return;
+    }
+
+    void Mandelbrot::ZoomPlot_Out()
+    {
+        // 50% zoom factor
+        double zoom_factor = 1.5;
+
+        // calculate midpoint of current active plot area on both axis
+        double real_midpoint = (plot_real_s_ + plot_real_e_) / 2.0;
+        double imag_midpoint = (plot_imag_s_ + plot_imag_e_) / 2.0;
+
+        // add the current active plot area by zoom_factor on both axis
+        plot_imag_e_ += (plot_imag_e_ * zoom_factor);
+        plot_imag_s_ += (plot_imag_s_ * zoom_factor);
+        plot_real_e_ += (plot_real_e_ * zoom_factor);
+        plot_real_s_ += (plot_real_s_ * zoom_factor);
+
+        // subtract the midpoints (scaled by the zoom_factor) to both axis to prevent converging to 0,0
+        plot_imag_e_ -= (imag_midpoint * zoom_factor);
+        plot_imag_s_ -= (imag_midpoint * zoom_factor);
+        plot_real_e_ -= (real_midpoint * zoom_factor);
+        plot_real_s_ -= (real_midpoint * zoom_factor);
+        
+        state_altered_ = true;
+        return;
+    }
+
     void Mandelbrot::IncreaseIterations()
     {
         if(current_iterations_limit_ < LIMIT_MAX_ITERATIONS_)
@@ -134,7 +268,7 @@ namespace SM
         }
 
         state_altered_ = false;
-        std::cout << "Computing cycle...\n";
+        //std::cout << "Computing cycle...\n";
         return;
     }
 }
