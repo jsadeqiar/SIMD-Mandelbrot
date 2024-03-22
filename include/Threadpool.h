@@ -17,9 +17,10 @@ namespace SM
         std::mutex mutex_;
         std::condition_variable cv_;
         std::queue<std::function<void()>> tasks_;
+        bool shutdown_ = false;
 
         void IdleLoop();
-        
+
     public:
         Threadpool();
         void StartPool();
@@ -27,7 +28,6 @@ namespace SM
         bool IsPoolBusy() const;
         void StopPool();
         
-        ~Threadpool();
     };
 }
 #endif
