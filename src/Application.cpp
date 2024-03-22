@@ -240,7 +240,7 @@ namespace SM
             ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
             ImGui::End();
-
+            
             if(mandelbrot_.IsStateAltered())
                 mandelbrot_.ComputeCycle((Mode)mode_selection);
             UpdateTexture(mandelbrot_.GetFrameBuffer());

@@ -17,7 +17,7 @@ namespace SM
         // push these threads into the vector and set them to run the IdleLoop()
         for(int i = 0; i < numThreads; i++)
         {
-            threads_.emplace_back(&IdleLoop);
+            threads_.emplace_back(&IdleLoop, this);
         }
 
         return;
@@ -25,7 +25,15 @@ namespace SM
 
     void Threadpool::QueueTask(std::function<void()> task)
     {
-        // TODO
+        // lock the mutex and push a task
+        {
+            std::unique_lock<std::mutex> lock(mutex_);
+
+            tasks_.push(task);
+        }
+
+        // notify a thread 
+        cv_.notify_one();
 
         return;
     }
