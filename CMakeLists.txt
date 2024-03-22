@@ -24,6 +24,7 @@ file(GLOB_RECURSE src_files
 
 file(GLOB_RECURSE test_files
     src/Framebuffer.cpp
+    src/Threadpool.cpp
     tests/*.h
     tests/*.cpp
 )

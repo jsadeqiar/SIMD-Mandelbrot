@@ -1,15 +1,13 @@
 #include "../include/Threadpool.h"
 
-
 namespace SM
 {
     Threadpool::Threadpool()
     {
-        StartPool();
         return;
     }
 
-    void Threadpool::StartPool()
+    bool Threadpool::StartPool()
     {
         // get the number of threads supported by the system.
         unsigned int numThreads = std::thread::hardware_concurrency();
@@ -17,10 +15,10 @@ namespace SM
         // push these threads into the vector and set them to run the IdleLoop()
         for(int i = 0; i < numThreads; i++)
         {
-            threads_.emplace_back(&IdleLoop, this);
+            threads_.emplace_back(&Threadpool::IdleLoop, this);
         }
 
-        return;
+        return true;
     }
 
     void Threadpool::QueueTask(std::function<void()> task)
@@ -51,7 +49,7 @@ namespace SM
             {
                 std::unique_lock<std::mutex> lock(mutex_);
 
-                cv_.wait(lock, [this](){ return shutdown_ || !tasks_.empty() });
+                cv_.wait(lock, [this](){ return shutdown_ || !tasks_.empty(); });
 
                 // break out of while loop and return (called from StopPool() to shutdown threadpool)
                 if(shutdown_)
@@ -73,7 +71,7 @@ namespace SM
         return !tasks_.empty();
     }
 
-    void Threadpool::StopPool()
+    bool Threadpool::StopPool()
     {
         // lock the mutex and set shutdown flag to true.
         {
@@ -91,6 +89,11 @@ namespace SM
             threads_[i].join();
         }
 
-        return;
+        return true;
+    }
+
+    int Threadpool::GetThreadCount() const
+    {
+        return threads_.size();
     }
 }

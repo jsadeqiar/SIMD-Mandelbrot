@@ -23,10 +23,12 @@ namespace SM
 
     public:
         Threadpool();
-        void StartPool();
+        bool StartPool();
         void QueueTask(std::function<void()> task);
         bool IsPoolBusy() const;
-        void StopPool();
+        bool StopPool();
+
+        int GetThreadCount() const;
         
     };
 }
