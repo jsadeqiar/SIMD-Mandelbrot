@@ -244,7 +244,17 @@ namespace SM
         return plot_imag_e_ - plot_imag_s_;
     }
 
-    void Mandelbrot::ComputeCycle()
+    void Mandelbrot::ComputeCycle(Mode mode)
+    {
+        if(mode == BASIC)
+            ComputeCycle_Basic();
+        else if(mode == MULTITHREADED)
+            ComputeCycle_Multithreaded();
+
+        return;
+    }
+
+    void Mandelbrot::ComputeCycle_Basic()
     {
         // scale the visible working region of the plot to the display width and height.
         double dx = (plot_real_e_ - plot_real_s_) / (width_);
@@ -279,6 +289,12 @@ namespace SM
 
         state_altered_ = false;
         //std::cout << "Computing cycle...\n";
+        return;
+    }
+
+    void Mandelbrot::ComputeCycle_Multithreaded()
+    {
+        // TODO
         return;
     }
 }

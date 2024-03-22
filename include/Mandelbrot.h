@@ -8,6 +8,12 @@
 
 namespace SM
 {
+    enum Mode
+    {
+        BASIC           = 1 << 0,
+        MULTITHREADED   = 1 << 1
+    };
+
     enum Direction
     {
         NORTH       =   1 << 0,  // 0b00000001
@@ -69,7 +75,9 @@ namespace SM
         const double GetWorkingImagAxisLength() const;
 
 
-        void ComputeCycle();
+        void ComputeCycle(Mode mode);
+        void ComputeCycle_Basic();
+        void ComputeCycle_Multithreaded();
 
     };
 }
