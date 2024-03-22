@@ -6,6 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <functional>
+#include <queue>
 
 namespace SM
 {
@@ -15,14 +16,14 @@ namespace SM
         std::vector<std::thread> threads_;
         std::mutex mutex_;
         std::condition_variable cv_;
+        std::queue<std::function<void()>> tasks_;
 
         void IdleLoop();
-
         
     public:
         Threadpool();
         void StartPool();
-        void QueueTask();
+        void QueueTask(std::function<void()> task);
         bool IsPoolBusy() const;
         void StopPool();
         
