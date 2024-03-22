@@ -23,8 +23,18 @@ namespace SM
         return;
     }
 
+    void Threadpool::QueueTask(std::function<void()> task)
+    {
+        // TODO
+
+        return;
+    }
+
     void Threadpool::IdleLoop()
     {
+        // TODO:
+        // std::function<void()> task;
+
         // threads will run forever in this function until shutdown_ flag is set.
         while(true)
         {
@@ -38,11 +48,21 @@ namespace SM
                 // break out of while loop and return (called from StopPool() to shutdown threadpool)
                 if(shutdown_)
                     break;
+
+                // TODO:
+                // SET TASK, POP TASK
             }
-            
+            // TODO:
+            // RUN TASK
         }
 
         return;
+    }
+
+    bool Threadpool::IsPoolBusy() const
+    {
+        // if tasks queue is not empty, work is being done, return true;
+        return !tasks_.empty();
     }
 
     void Threadpool::StopPool()
