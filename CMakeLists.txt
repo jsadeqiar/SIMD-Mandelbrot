@@ -6,10 +6,12 @@ set(IMGUI_BACKEND ${IMGUI}backends/)
 
 add_subdirectory(lib/SDL EXCLUDE_FROM_ALL)
 add_subdirectory(lib/gtest)
+add_subdirectory(lib/xsimd)
 
 set(CMAKE_CXX_STANDARD 14)
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:CONSOLE /entry:mainCRTStartup")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX2")
 
 file(GLOB_RECURSE src_files
     src/*.cpp
@@ -41,11 +43,13 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     include/
     ${IMGUI}
     ${IMGUI_BACKEND}
+    lib/xsimd/include/
 )
 
 target_include_directories(${CMAKE_PROJECT_NAME}_TESTS PRIVATE
     inc_files
     include/
+    lib/xsimd/include
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SDL3::SDL3)
