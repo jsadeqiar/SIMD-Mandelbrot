@@ -89,6 +89,8 @@ namespace SM
         {
             threads_[i].join();
         }
+        
+        threads_.clear();
 
         return true;
     }
