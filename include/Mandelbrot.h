@@ -2,6 +2,7 @@
 #define MANDELBROT_H
 
 #include "./Framebuffer.h"
+#include "./Threadpool.h"
 #include <complex>
 #include <iostream>
 #include <map>
@@ -43,6 +44,7 @@ namespace SM
         bool state_altered_ = false;
 
         Framebuffer framebuffer_;
+        Threadpool threadpool_;
         SDL_PixelFormat* pixel_format_;
         
     public:
@@ -78,6 +80,7 @@ namespace SM
         void ComputeCycle(Mode mode);
         void ComputeCycle_Basic();
         void ComputeCycle_Multithreaded();
+        void ThreadpoolTaskCreator(int xS, int xE, int yS, int yE, double dx, double dy);
 
     };
 }
