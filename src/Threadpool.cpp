@@ -28,6 +28,7 @@ namespace SM
             std::unique_lock<std::mutex> lock(mutex_);
 
             tasks_.push(task);
+            jobs_pending_++;
         }
 
         // notify a thread 
@@ -38,8 +39,8 @@ namespace SM
 
     void Threadpool::IdleLoop()
     {
-        // TODO:
-        // std::function<void()> task;
+        
+        std::function<void()> task;
 
         // threads will run forever in this function until shutdown_ flag is set.
         while(true)
@@ -55,11 +56,11 @@ namespace SM
                 if(shutdown_)
                     break;
 
-                // TODO:
-                // SET TASK, POP TASK
+                task = tasks_.front();
+                tasks_.pop();
             }
-            // TODO:
-            // RUN TASK
+            task();
+            jobs_pending_--;
         }
 
         return;
@@ -67,8 +68,8 @@ namespace SM
 
     bool Threadpool::IsPoolBusy() const
     {
-        // if tasks queue is not empty, work is being done, return true;
-        return !tasks_.empty();
+        // if there are any active jobs RUNNING, return true.
+        return jobs_pending_;
     }
 
     bool Threadpool::StopPool()

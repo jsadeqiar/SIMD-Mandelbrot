@@ -7,6 +7,7 @@
 #include <condition_variable>
 #include <functional>
 #include <queue>
+#include <atomic>
 
 namespace SM
 {
@@ -18,6 +19,7 @@ namespace SM
         std::condition_variable cv_;
         std::queue<std::function<void()>> tasks_;
         bool shutdown_ = false;
+        std::atomic<int> jobs_pending_;
 
         void IdleLoop();
 
