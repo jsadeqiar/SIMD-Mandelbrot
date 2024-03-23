@@ -19,7 +19,7 @@ namespace SM
         std::condition_variable cv_;
         std::queue<std::function<void()>> tasks_;
         bool shutdown_ = false;
-        std::atomic<int> jobs_pending_;
+        std::atomic<int> tasks_pending_ = 0;
 
         void IdleLoop();
 

@@ -28,7 +28,7 @@ namespace SM
             std::unique_lock<std::mutex> lock(mutex_);
 
             tasks_.push(task);
-            jobs_pending_++;
+            tasks_pending_++;
         }
 
         // notify a thread 
@@ -60,7 +60,7 @@ namespace SM
                 tasks_.pop();
             }
             task();
-            jobs_pending_--;
+            tasks_pending_--;
         }
 
         return;
@@ -69,7 +69,7 @@ namespace SM
     bool Threadpool::IsPoolBusy() const
     {
         // if there are any active jobs RUNNING, return true.
-        return jobs_pending_;
+        return tasks_pending_;
     }
 
     bool Threadpool::StopPool()
