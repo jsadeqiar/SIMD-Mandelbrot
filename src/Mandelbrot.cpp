@@ -6,11 +6,13 @@ namespace SM
     {
     }
 
+    // copy constructor
     Mandelbrot::Mandelbrot(const Mandelbrot& mandelbrot)
     : Mandelbrot(mandelbrot.height_, mandelbrot.width_, mandelbrot.pixel_format_)
     {
     }
 
+    // copy assignment operator 
     Mandelbrot& Mandelbrot::operator=(const Mandelbrot& mandelbrot)
     {
         if(this == &mandelbrot)
@@ -24,6 +26,7 @@ namespace SM
         return *this;
     }
 
+    // overloaded constructor
     Mandelbrot::Mandelbrot(int height, int width, SDL_PixelFormat* pixel_format)
     : height_(height), width_(width), framebuffer_(Framebuffer(height_, width_, pixel_format))
     {
@@ -31,6 +34,7 @@ namespace SM
 
     Mandelbrot::~Mandelbrot()
     {
+        threadpool_.StopPool();
     }
 
     void Mandelbrot::PanPlot(Direction dir)
@@ -244,7 +248,17 @@ namespace SM
         return plot_imag_e_ - plot_imag_s_;
     }
 
-    void Mandelbrot::ComputeCycle()
+    void Mandelbrot::ComputeCycle(Mode mode)
+    {
+        if(mode == BASIC)
+            ComputeCycle_Basic();
+        else if(mode == MULTITHREADED)
+            ComputeCycle_Multithreaded();
+
+        return;
+    }
+
+    void Mandelbrot::ComputeCycle_Basic()
     {
         // scale the visible working region of the plot to the display width and height.
         double dx = (plot_real_e_ - plot_real_s_) / (width_);
@@ -266,8 +280,6 @@ namespace SM
                     z = (z * z) + c;
                     curr_iter++;
                 }
-
-                //int temp = (int)(255 * ((double)curr_iter / (double)iterations_));
                 
                 if(curr_iter == current_iterations_limit_)
                     framebuffer_.SetPixel(y, x, Color(0, 0, 0, 0));
@@ -278,7 +290,63 @@ namespace SM
         }
 
         state_altered_ = false;
-        //std::cout << "Computing cycle...\n";
+        return;
+    }
+
+    void Mandelbrot::ComputeCycle_Multithreaded()
+    {
+        if(threadpool_.GetThreadCount() == 0)
+            threadpool_.StartPool();
+
+        // divide the work among the number of threads
+        int numThreads = threadpool_.GetThreadCount();
+
+        // scale the visible working region of the plot to the display width and height.
+        double dx = (plot_real_e_ - plot_real_s_) / (width_);
+        double dy = (plot_imag_e_ - plot_imag_s_) / (height_);
+
+        for(double i = 0.0; i < (double)numThreads; i++)
+        {
+            int xS = (i       / (double)numThreads) * width_;
+            int xE = ((i + 1) / (double)numThreads) * width_;
+            int yS = 0;
+            int yE = height_;
+            threadpool_.QueueTask([=, &dx, &dy]{
+                ThreadpoolTaskCreator(xS, xE, yS, yE, dx, dy);
+            });
+        }
+
+        while(threadpool_.IsPoolBusy()){}
+        state_altered_ = false;
+
+        return;
+    }
+
+    void Mandelbrot::ThreadpoolTaskCreator(int xS, int xE, int yS, int yE, double dx, double dy)
+    {
+        for(int y = yS; y < yE; y++)
+        {
+            for(int x = xS; x < xE; x++)
+            {
+                std::complex<double> z(0, 0);
+                std::complex<double> c(plot_real_s_ + x * dx, plot_imag_s_ + y * dy);
+                int curr_iter = 0;
+
+                while(std::abs(z) < 2.0 && curr_iter < current_iterations_limit_)
+                {
+                    z = (z * z) + c;
+                    curr_iter++;
+                }
+
+                if(curr_iter == current_iterations_limit_)
+                    framebuffer_.SetPixel(y, x, Color(0, 0, 0, 0));
+
+                else
+                    framebuffer_.SetPixel(y, x, Color((int)(255 * ((double)curr_iter / (double)current_iterations_limit_)), 0, 0, 0));
+
+            }
+        }
+
         return;
     }
 }

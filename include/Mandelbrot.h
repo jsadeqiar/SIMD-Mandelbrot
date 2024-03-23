@@ -2,12 +2,19 @@
 #define MANDELBROT_H
 
 #include "./Framebuffer.h"
+#include "./Threadpool.h"
 #include <complex>
 #include <iostream>
 #include <map>
 
 namespace SM
 {
+    enum Mode
+    {
+        BASIC           = 1 << 0,
+        MULTITHREADED   = 1 << 1
+    };
+
     enum Direction
     {
         NORTH       =   1 << 0,  // 0b00000001
@@ -37,6 +44,7 @@ namespace SM
         bool state_altered_ = false;
 
         Framebuffer framebuffer_;
+        Threadpool threadpool_;
         SDL_PixelFormat* pixel_format_;
         
     public:
@@ -69,7 +77,10 @@ namespace SM
         const double GetWorkingImagAxisLength() const;
 
 
-        void ComputeCycle();
+        void ComputeCycle(Mode mode);
+        void ComputeCycle_Basic();
+        void ComputeCycle_Multithreaded();
+        void ThreadpoolTaskCreator(int xS, int xE, int yS, int yE, double dx, double dy);
 
     };
 }

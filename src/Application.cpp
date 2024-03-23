@@ -50,7 +50,7 @@ namespace SM
         LIMIT_MIN_ITERATIONS_ = mandelbrot_.GetIterationLimitMin();
 
         // Initial cycle for texture
-        mandelbrot_.ComputeCycle();
+        mandelbrot_.ComputeCycle_Basic();
 
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
 
@@ -173,13 +173,10 @@ namespace SM
             StartFrame();
             DrawDockSpace();
 
-            if(mandelbrot_.IsStateAltered())
-                mandelbrot_.ComputeCycle();
-            UpdateTexture(mandelbrot_.GetFrameBuffer());
-
             if(demo_)
                   ImGui::ShowDemoWindow(&demo_);
             
+            // main editor window
             ImGui::Begin("Main window");
             ImGui::Checkbox("Show Demo Window", &demo_);
             
@@ -235,7 +232,18 @@ namespace SM
             
             ImGui::SeparatorText("Frametime/Framerate");
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io_.Framerate, io_.Framerate);
-            ImGui::End();   
+            ImGui::End(); 
+
+            // mode selection window
+            ImGui::Begin("Mode selection");
+            static int mode_selection = 1;
+            ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
+            ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
+            ImGui::End();
+            
+            if(mandelbrot_.IsStateAltered())
+                mandelbrot_.ComputeCycle((Mode)mode_selection);
+            UpdateTexture(mandelbrot_.GetFrameBuffer());
 
             ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
             ImGui::Begin("Testing internal dockspace win", nullptr);
