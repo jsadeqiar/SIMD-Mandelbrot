@@ -260,6 +260,9 @@ namespace SM
 
     void Mandelbrot::ComputeCycle_Basic()
     {
+        if(threadpool_.GetThreadCount() != 0)
+            threadpool_.StopPool();
+
         // scale the visible working region of the plot to the display width and height.
         double dx = (plot_real_e_ - plot_real_s_) / (width_);
         double dy = (plot_imag_e_ - plot_imag_s_) / (height_);
@@ -315,10 +318,8 @@ namespace SM
                 ThreadpoolTaskCreator(xS, xE, yS, yE, dx, dy);
             });
         }
-
         while(threadpool_.IsPoolBusy()){}
         state_altered_ = false;
-
         return;
     }
 

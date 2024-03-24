@@ -1,5 +1,5 @@
 #include "../include/Threadpool.h"
-
+#include <iostream>
 namespace SM
 {
     Threadpool::Threadpool()
@@ -11,6 +11,7 @@ namespace SM
     {
         // get the number of threads supported by the system.
         unsigned int numThreads = std::thread::hardware_concurrency();
+        shutdown_ = false;
 
         // push these threads into the vector and set them to run the IdleLoop()
         for(int i = 0; i < numThreads; i++)
