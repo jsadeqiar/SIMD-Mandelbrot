@@ -239,6 +239,7 @@ namespace SM
             static int mode_selection = 1;
             ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
+            ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2); ImGui::SameLine();
             ImGui::End();
             
             if(mandelbrot_.IsStateAltered())

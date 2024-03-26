@@ -3,16 +3,19 @@
 
 #include "./Framebuffer.h"
 #include "./Threadpool.h"
+#include "xsimd/xsimd.hpp"
 #include <complex>
 #include <iostream>
 #include <map>
 
 namespace SM
 {
+    namespace xs = xsimd;
     enum Mode
     {
         BASIC           = 1 << 0,
-        MULTITHREADED   = 1 << 1
+        MULTITHREADED   = 1 << 1,
+        MT_SIMD         = 1 << 2
     };
 
     enum Direction
@@ -46,6 +49,8 @@ namespace SM
         Framebuffer framebuffer_;
         Threadpool threadpool_;
         SDL_PixelFormat* pixel_format_;
+
+        Mode current_mode_;
         
     public:
         Mandelbrot();
@@ -80,7 +85,10 @@ namespace SM
         void ComputeCycle(Mode mode);
         void ComputeCycle_Basic();
         void ComputeCycle_Multithreaded();
-        void ThreadpoolTaskCreator(int xS, int xE, int yS, int yE, double dx, double dy);
+        void ComputeCycle_MultithreadedSIMD();
+        void ThreadpoolCreateJob(int xS, int xE, int yS, int yE, double dx, double dy);
+        void ThreadpoolCreateJobSIMD(int xS, int xE, int yS, int yE, double dx, double dy);
+
 
     };
 }
