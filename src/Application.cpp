@@ -24,7 +24,7 @@ namespace SM
             exit(0);
         }
 
-        SDL_SetWindowTitle(window_, "Main Window");
+        SDL_SetWindowTitle(window_, "SIMD Mandelbrot Viewer");
 
         pixel_format_ = SDL_CreatePixelFormat(SDL_GetWindowPixelFormat(window_));
         //pixel_format_->format = SDL_PIXELFORMAT_RGBA32; // ???
@@ -144,6 +144,7 @@ namespace SM
     {
         while(running_)
         {
+            static bool disable_all = false;
             SDL_Event event;
             while(SDL_PollEvent(&event))
             {
@@ -152,7 +153,7 @@ namespace SM
                 running_ = false;
             if (event.type == SDL_EVENT_WINDOW_CLOSE_REQUESTED && event.window.windowID == SDL_GetWindowID(window_))
                 running_ = false;
-            if(event.type == SDL_EVENT_KEY_DOWN && event.key.repeat == 0)
+            if(event.type == SDL_EVENT_KEY_DOWN && event.key.repeat == 0 && !disable_all)
             {
                 if(event.key.keysym.sym == SDLK_w)
                     mandelbrot_.PanPlot(NORTH);
@@ -177,7 +178,6 @@ namespace SM
             //if(demo_)
             //      ImGui::ShowDemoWindow(&demo_);
             
-            static bool disable_all = false;
             if(disable_all)
                 ImGui::BeginDisabled();
 
