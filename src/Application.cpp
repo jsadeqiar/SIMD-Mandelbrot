@@ -177,6 +177,10 @@ namespace SM
             if(demo_)
                   ImGui::ShowDemoWindow(&demo_);
             
+            static bool disable_all = false;
+            if(disable_all)
+                ImGui::BeginDisabled();
+
             // main editor window
             ImGui::Begin("Main window");
             ImGui::Checkbox("Show Demo Window", &demo_);
@@ -243,15 +247,76 @@ namespace SM
             ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2);
-            ImGui::NewLine();
-            //ImGui::SeparatorText("Frametime visualizer");
+            //ImGui::NewLine();
+            
+            ImGui::SeparatorText("Frametime visualizer");
+            static std::vector<float> data(3, 0.0);
+            ImGui::PlotHistogram("Frametime Comparison", data.data(), data.size(), 0, NULL, 0.0f, 1.0f, ImVec2(0, 80.0f));
+            ImGui::SameLine();
+            HelpMarker(
+                "Frametime comparison between the 3 modes respectively.\n"
+                "(Lower is better)."
+            );
+            
+            if(disable_all)
+                ImGui::EndDisabled();
 
-            //static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
-            //ImGui::PlotHistogram("Frametime Comparison", arr, IM_ARRAYSIZE(arr), 0, NULL, 0.0f, 1.0f, ImVec2(0, 80.0f));
+
+            static bool animate = false;
+            static bool benchmark = false;
+            static float progress = 0.0f, progress_dir = 1.0f;
+            if(animate)
+            {
+                progress += progress_dir * 0.033f * ImGui::GetIO().DeltaTime;
+            }
+            if(ImGui::Button("Benchmark"))
+            {
+                // if benchmark is OFF, set it all up and turn it ON
+                if(!benchmark)
+                {
+                    progress = 0.0f;
+                    current_iterations_limit = mandelbrot_.GetIterationLimitMax();
+                    mandelbrot_.SetCustomIteration(current_iterations_limit);
+                    mode_selection = 1 << 0;
+                    benchmark = true;
+                    animate = true;
+                    disable_all = true;
+                }
+            }
+            if(benchmark)
+            {
+                if(progress > 0.33f && mode_selection == (1 << 0))
+                {
+                    data[0] = 1000.0f / io_.Framerate;
+                    mode_selection = 1 << 1;
+                }
+                else if(progress > 0.66f && mode_selection == (1 << 1))
+                {
+                    data[1] = 1000.0f / io_.Framerate;
+                    mode_selection = 1 << 2;
+                }
+                else if(progress > 1.0f)
+                {
+                    data[2] = 1000.0f / io_.Framerate;
+                    mode_selection = 1 << 0;
+                    current_iterations_limit = 1 << 5;
+                    mandelbrot_.SetCustomIteration(1 << 5);
+                }
+                
+                // benchmark is complete
+                if(progress > 1.0f)
+                {
+                    disable_all = false;
+                    animate = false;
+                    benchmark = false;
+                }
+            }
+            ImGui::ProgressBar(progress, ImVec2(0.0f, 0.0f));
+            
 
             ImGui::End();
             
-            if(mandelbrot_.IsStateAltered())
+            //if(mandelbrot_.IsStateAltered())
                 mandelbrot_.ComputeCycle((Mode)mode_selection);
             UpdateTexture(mandelbrot_.GetFrameBuffer());
 
