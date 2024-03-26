@@ -254,12 +254,17 @@ namespace SM
             ComputeCycle_Basic();
         else if(mode == MULTITHREADED)
             ComputeCycle_Multithreaded();
+        else if(mode == MT_SIMD)
+            ComputeCycle_MultithreadedSIMD();
 
         return;
     }
 
     void Mandelbrot::ComputeCycle_Basic()
     {
+        if(threadpool_.GetThreadCount() != 0)
+            threadpool_.StopPool();
+
         // scale the visible working region of the plot to the display width and height.
         double dx = (plot_real_e_ - plot_real_s_) / (width_);
         double dy = (plot_imag_e_ - plot_imag_s_) / (height_);
@@ -312,17 +317,43 @@ namespace SM
             int yS = 0;
             int yE = height_;
             threadpool_.QueueTask([=, &dx, &dy]{
-                ThreadpoolTaskCreator(xS, xE, yS, yE, dx, dy);
+                ThreadpoolCreateJob(xS, xE, yS, yE, dx, dy);
             });
         }
-
         while(threadpool_.IsPoolBusy()){}
         state_altered_ = false;
-
         return;
     }
 
-    void Mandelbrot::ThreadpoolTaskCreator(int xS, int xE, int yS, int yE, double dx, double dy)
+    void Mandelbrot::ComputeCycle_MultithreadedSIMD()
+    {
+        if(threadpool_.GetThreadCount() == 0)
+            threadpool_.StartPool();
+        
+        // divide the work among the number of threads
+        int numThreads = threadpool_.GetThreadCount();
+
+        // scale the visible working region of the plot to the display width and height.
+        double dx = (plot_real_e_ - plot_real_s_) / (width_);
+        double dy = (plot_imag_e_ - plot_imag_s_) / (height_);
+
+        for(double i = 0.0; i < (double)numThreads; i++)
+        {
+            int xS = (i       / (double)numThreads) * width_;
+            int xE = ((i + 1) / (double)numThreads) * width_;
+            int yS = 0;
+            int yE = height_;
+            threadpool_.QueueTask([=, &dx, &dy]{
+                ThreadpoolCreateJobSIMD(xS, xE, yS, yE, dx, dy);
+            });
+        }
+        while(threadpool_.IsPoolBusy()){}
+        state_altered_ = false;
+        return;
+
+    }
+
+    void Mandelbrot::ThreadpoolCreateJob(int xS, int xE, int yS, int yE, double dx, double dy)
     {
         for(int y = yS; y < yE; y++)
         {
@@ -344,6 +375,88 @@ namespace SM
                 else
                     framebuffer_.SetPixel(y, x, Color((int)(255 * ((double)curr_iter / (double)current_iterations_limit_)), 0, 0, 0));
 
+            }
+        }
+
+        return;
+    }
+
+    void Mandelbrot::ThreadpoolCreateJobSIMD(int xS, int xE, int yS, int yE, double dx, double dy)
+    {
+        using double_batch = xs::batch<double, xs::avx2>;
+        using bool_batch   = xs::batch_bool<double, xsimd::avx2>;
+
+        std::size_t x_range = xE - xS;
+        std::size_t batch_size = double_batch::size;
+        std::size_t simd_range = x_range - (x_range % batch_size);
+        
+        // send off portions that wont fill up a simd batch to be computed normally with multithreading
+        threadpool_.QueueTask([=]{
+            ThreadpoolCreateJob(xS + simd_range, xE, yS, yE, dx, dy);
+        });
+
+        double_batch zr, zi, cr, ci;
+        double_batch zr2, zi2, zr2subzi2, newzr, zr2addzi2;
+        double_batch zrmulzi, newzi;
+        double_batch curr_iter;
+
+        bool_batch condition_mask1, condition_mask2, combined_mask;
+
+        // constant batches
+        double_batch two = double_batch::broadcast(2.0);
+        double_batch four = double_batch::broadcast(4.0);
+        double_batch current_iterations_limit = double_batch::broadcast((double)current_iterations_limit_);
+
+        std::vector<double> temp(batch_size, 0.0);
+
+
+        // now to compute the main region of the thread that can be SIMD'd
+        for(int y = yS; y < yE; y++)
+        {
+            ci = double_batch::broadcast(plot_imag_s_ + y * dy);
+            
+            for(int x = xS; x < (xS + simd_range); x += batch_size)
+            {
+                curr_iter = double_batch::broadcast(0.0);
+                zr = double_batch::broadcast(0.0);
+                zi = double_batch::broadcast(0.0);
+                cr = double_batch::batch(plot_real_s_ + x * dx,
+                                         plot_real_s_ + (x + 1) * dx,
+                                         plot_real_s_ + (x + 2) * dx,
+                                         plot_real_s_ + (x + 3) * dx);
+
+                do
+                {
+                    zr2         = xs::mul(zr, zr);
+                    zi2         = xs::mul(zi, zi);
+                    zr2subzi2   = xs::sub(zr2, zi2);
+                    newzr       = xs::add(zr2subzi2, cr);
+                    zrmulzi     = xs::mul(zr, zi);
+                    newzi       = xs::fma(zrmulzi, two, ci);
+                    zr2addzi2   = xs::add(zr2, zi2);
+
+                    condition_mask1 = xs::lt(zr2addzi2, four);
+                    condition_mask2 = xs::lt(curr_iter, current_iterations_limit);
+                    combined_mask   = xs::bitwise_and(condition_mask1, condition_mask2);
+                    
+                    
+                    curr_iter = xs::incr_if(curr_iter, combined_mask);
+
+                    zr = newzr;
+                    zi = newzi;
+                    //std::cout << combined_mask.mask() << '\n';
+                } while (combined_mask.mask());
+                
+                curr_iter.store_unaligned(&temp[0]);
+
+                for(int i = 0; i < temp.size(); i++)
+                {
+                    if(temp[i] == current_iterations_limit_)
+                        framebuffer_.SetPixel(y, x + i, Color(0, 0, 0, 0));
+                    else
+                    framebuffer_.SetPixel(y, x + i, Color((int)(255 * ((double)temp[i] / (double)current_iterations_limit_)), 0, 0, 0));
+                }
+                
             }
         }
 

@@ -50,7 +50,7 @@ namespace SM
         LIMIT_MIN_ITERATIONS_ = mandelbrot_.GetIterationLimitMin();
 
         // Initial cycle for texture
-        mandelbrot_.ComputeCycle_Basic();
+        mandelbrot_.ComputeCycle(BASIC);
 
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
 
@@ -239,6 +239,7 @@ namespace SM
             static int mode_selection = 1;
             ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
+            ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2); ImGui::SameLine();
             ImGui::End();
             
             if(mandelbrot_.IsStateAltered())

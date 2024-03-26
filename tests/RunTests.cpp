@@ -1,6 +1,7 @@
 #include "gtest/gtest.h"
 #include "Framebuffer_Tests.h"
 #include "Threadpool_Tests.h"
+#include "SIMD_Tests.h"
 
 int main(int argc, char** argv)
 {
