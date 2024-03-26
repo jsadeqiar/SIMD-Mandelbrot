@@ -102,5 +102,31 @@ TEST(SIMDTest, GrabComplexFromBufferThenMultiply)
     }
 }
 
+TEST(SIMDTest, AddBasedOnMask)
+{
+    using double_batch = xs::batch<double, xs::avx2>;
+    using b_batch = xsimd::batch_bool<double, xsimd::avx2>;
+
+    std::vector<double> result(4, 0.0);
+    const std::vector<double> reference_result = { 1.0, 1.0, 5.0, 3.0 };
+
+    // initial values
+    double_batch values = { 1.0, 1.0, 4.0, 2.0 };
+
+    // create a mask based on what numbers are even (f, f, t, t)
+    b_batch mask  = xs::is_even(values);
+
+    // incremenet values based on mask if true.
+    values = xs::incr_if(values, mask);
+
+    // store values in vector
+    values.store_unaligned(&result[0]);
+
+    for(int i = 0; i < 4; i++)
+    {
+        EXPECT_EQ(result[i], reference_result[i]);
+    }
+}
+
 
 #endif
