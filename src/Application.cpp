@@ -102,8 +102,7 @@ namespace SM
     inline void Application::DrawDockSpace()
     {
         static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | 
-                                        ImGuiWindowFlags_NoDocking | 
+        ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | 
                                         ImGuiWindowFlags_NoScrollbar | 
                                         ImGuiWindowFlags_NoMove | 
                                         ImGuiWindowFlags_NoResize | 
@@ -124,15 +123,15 @@ namespace SM
             dockspace_id_ = ImGui::GetID("MyDockSpace");
             ImGui::DockSpace(dockspace_id_, ImVec2(0.0f, 0.0f), dockspace_flags);
         }
-        if(ImGui::BeginMenuBar())
-        {
-            if(ImGui::BeginMenu("Test"))
-            {
-                ImGui::Separator();
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
+        //if(ImGui::BeginMenuBar())
+        //{
+        //    if(ImGui::BeginMenu("Test"))
+        //    {
+        //        ImGui::Separator();
+        //        ImGui::EndMenu();
+        //    }
+        //    ImGui::EndMenuBar();
+        //}
         
         ImGui::End();                                       // Dockspace end
 
@@ -239,10 +238,17 @@ namespace SM
 
             // mode selection window
             ImGui::Begin("Mode selection");
+            ImGui::SeparatorText("Mode Selection");
             static int mode_selection = 1;
             ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
             ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
-            ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2); ImGui::SameLine();
+            ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2);
+            ImGui::NewLine();
+            //ImGui::SeparatorText("Frametime visualizer");
+
+            //static float arr[] = { 0.6f, 0.1f, 1.0f, 0.5f, 0.92f, 0.1f, 0.2f };
+            //ImGui::PlotHistogram("Frametime Comparison", arr, IM_ARRAYSIZE(arr), 0, NULL, 0.0f, 1.0f, ImVec2(0, 80.0f));
+
             ImGui::End();
             
             if(mandelbrot_.IsStateAltered())
@@ -250,7 +256,7 @@ namespace SM
             UpdateTexture(mandelbrot_.GetFrameBuffer());
 
             ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
-            ImGui::Begin("Testing internal dockspace win", nullptr);
+            ImGui::Begin("Viewer", nullptr);
             ImGui::Image((void*)texture_, ImVec2(texWidth_, texHeight_));
             ImGui::End();
                                         
