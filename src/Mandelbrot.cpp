@@ -69,6 +69,15 @@ namespace SM
                 PanPlot_South();
                 PanPlot_West();
                 break;
+            case RESET:
+                ResetPlot();
+                break;
+            case ZOOMIN:
+                ZoomPlot_In();
+                break;
+            case ZOOMOUT:
+                ZoomPlot_Out();
+                break;
             default:
                 break;
         }
@@ -188,7 +197,6 @@ namespace SM
         {
             current_iterations_limit_ <<= 1;
             state_altered_ = true;
-            std::cout << "Iter++ " << current_iterations_limit_ << '\n';
         }
         
         return;
@@ -200,7 +208,6 @@ namespace SM
         {
             current_iterations_limit_ >>= 1;
             state_altered_ = true;
-            std::cout << "Iter-- " << current_iterations_limit_ << '\n';
         }
 
         return;
@@ -219,7 +226,6 @@ namespace SM
             current_iterations_limit_ = val;
         }
         state_altered_ = true;
-        std::cout << "Manual Iter change: " << current_iterations_limit_ << '\n';
 
         return;
     }
@@ -261,8 +267,8 @@ namespace SM
 
     void Mandelbrot::ComputeCycle(Mode mode)
     {
-        if(mode == BASIC)
-            ComputeCycle_Basic();
+        if(mode == SINGLETHREADED)
+            ComputeCycle_Singlethreaded();
         else if(mode == MULTITHREADED)
             ComputeCycle_Multithreaded();
         else if(mode == MT_SIMD)
@@ -271,7 +277,7 @@ namespace SM
         return;
     }
 
-    void Mandelbrot::ComputeCycle_Basic()
+    void Mandelbrot::ComputeCycle_Singlethreaded()
     {
         if(threadpool_.GetThreadCount() != 0)
             threadpool_.StopPool();
@@ -455,7 +461,7 @@ namespace SM
 
                     zr = newzr;
                     zi = newzi;
-                    //std::cout << combined_mask.mask() << '\n';
+                    
                 } while (combined_mask.mask());
                 
                 curr_iter.store_unaligned(&temp[0]);

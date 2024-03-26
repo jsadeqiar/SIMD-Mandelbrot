@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "SDL.h"
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui.h"
 #include "imgui_impl_sdlrenderer3.h"
 #include "imgui_impl_sdl3.h"

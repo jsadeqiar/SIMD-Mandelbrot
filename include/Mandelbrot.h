@@ -13,7 +13,7 @@ namespace SM
     namespace xs = xsimd;
     enum Mode
     {
-        BASIC           = 1 << 0,
+        SINGLETHREADED           = 1 << 0,
         MULTITHREADED   = 1 << 1,
         MT_SIMD         = 1 << 2
     };
@@ -27,7 +27,10 @@ namespace SM
         NORTHEAST   =   1 << 4,  // 0b00010000
         NORTHWEST   =   1 << 5,  // 0b00100000
         SOUTHEAST   =   1 << 6,  // 0b01000000
-        SOUTHWEST   =   1 << 7   // 0b10000000
+        SOUTHWEST   =   1 << 7,  // 0b10000000
+        RESET       =   1 << 8,
+        ZOOMOUT     =   1 << 9,
+        ZOOMIN      =   1 << 10
     };
 
     class Mandelbrot
@@ -51,6 +54,20 @@ namespace SM
         SDL_PixelFormat* pixel_format_;
 
         Mode current_mode_;
+
+        void PanPlot_North();
+        void PanPlot_South();
+        void PanPlot_West();
+        void PanPlot_East();
+        void ZoomPlot_In();
+        void ZoomPlot_Out();
+        void ResetPlot();
+
+        void ComputeCycle_Singlethreaded();
+        void ComputeCycle_Multithreaded();
+        void ComputeCycle_MultithreadedSIMD();
+        void ThreadpoolCreateJob(int xS, int xE, int yS, int yE, double dx, double dy);
+        void ThreadpoolCreateJobSIMD(int xS, int xE, int yS, int yE, double dx, double dy);
         
     public:
         Mandelbrot();
@@ -60,14 +77,7 @@ namespace SM
         ~Mandelbrot();
 
         void PanPlot(Direction dir);
-        void PanPlot_North();
-        void PanPlot_South();
-        void PanPlot_West();
-        void PanPlot_East();
-        void ZoomPlot_In();
-        void ZoomPlot_Out();
-        void ResetPlot();
-
+        
         // Setters
         void IncreaseIterations();
         void DecreaseIterations();
@@ -82,15 +92,7 @@ namespace SM
         const double GetWorkingRealAxisLength() const;
         const double GetWorkingImagAxisLength() const;
 
-
         void ComputeCycle(Mode mode);
-        void ComputeCycle_Basic();
-        void ComputeCycle_Multithreaded();
-        void ComputeCycle_MultithreadedSIMD();
-        void ThreadpoolCreateJob(int xS, int xE, int yS, int yE, double dx, double dy);
-        void ThreadpoolCreateJobSIMD(int xS, int xE, int yS, int yE, double dx, double dy);
-
-
     };
 }
 

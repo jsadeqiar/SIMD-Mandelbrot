@@ -41,7 +41,7 @@ namespace SM
         style.FrameBorderSize = 1.0f;
 
         running_ = true;
-        demo_ = true;
+        demo_ = false;
         texHeight_ = 600;
         texWidth_ = 1000;
 
@@ -50,7 +50,7 @@ namespace SM
         LIMIT_MIN_ITERATIONS_ = mandelbrot_.GetIterationLimitMin();
 
         // Initial cycle for texture
-        mandelbrot_.ComputeCycle(BASIC);
+        mandelbrot_.ComputeCycle(SINGLETHREADED);
 
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
 
@@ -163,27 +163,27 @@ namespace SM
                 if(event.key.keysym.sym == SDLK_d)
                     mandelbrot_.PanPlot(EAST);
                 if(event.key.keysym.sym == SDLK_f)
-                    mandelbrot_.ZoomPlot_In();
+                    mandelbrot_.PanPlot(ZOOMIN);
                 if(event.key.keysym.sym == SDLK_g)
-                    mandelbrot_.ZoomPlot_Out();
+                    mandelbrot_.PanPlot(ZOOMOUT);
                 if(event.key.keysym.sym == SDLK_r)
-                    mandelbrot_.ResetPlot();
+                    mandelbrot_.PanPlot(RESET);
             }
             }
 
             StartFrame();
             DrawDockSpace();
 
-            if(demo_)
-                  ImGui::ShowDemoWindow(&demo_);
+            //if(demo_)
+            //      ImGui::ShowDemoWindow(&demo_);
             
             static bool disable_all = false;
             if(disable_all)
                 ImGui::BeginDisabled();
 
             // main editor window
-            ImGui::Begin("Main window");
-            ImGui::Checkbox("Show Demo Window", &demo_);
+            ImGui::Begin("Plot Explorer");
+            //ImGui::Checkbox("Show Demo Window", &demo_);
             
             // Iteration Editor UI
             ImGui::SeparatorText("Iteration Editor");
@@ -217,11 +217,11 @@ namespace SM
             if(ImGui::Button(" W "))
                 mandelbrot_.PanPlot(WEST);          ImGui::SameLine();
             if(ImGui::Button(" R "))
-                mandelbrot_.ResetPlot();            ImGui::SameLine();
+                mandelbrot_.PanPlot(RESET);            ImGui::SameLine();
             if(ImGui::Button(" E "))
                 mandelbrot_.PanPlot(EAST);          ImGui::SameLine();
             if(ImGui::Button(" + "))
-                mandelbrot_.ZoomPlot_In();          ImGui::SameLine();
+                mandelbrot_.PanPlot(ZOOMIN);       ImGui::SameLine();
 
             ImGui::Text("Length of Working Real Axis: %.15f", mandelbrot_.GetWorkingRealAxisLength());
 
@@ -232,7 +232,7 @@ namespace SM
             if(ImGui::Button("S/E"))
                 mandelbrot_.PanPlot(SOUTHEAST);     ImGui::SameLine();
             if(ImGui::Button(" - "))
-                mandelbrot_.ZoomPlot_Out();         ImGui::SameLine();
+                mandelbrot_.PanPlot(ZOOMOUT);       ImGui::SameLine();
             
             ImGui::Text("Length of Working Imag Axis: %.15f", mandelbrot_.GetWorkingImagAxisLength());
             
@@ -244,9 +244,9 @@ namespace SM
             ImGui::Begin("Mode selection");
             ImGui::SeparatorText("Mode Selection");
             static int mode_selection = 1;
-            ImGui::RadioButton("Basic", &mode_selection, 1 << 0); ImGui::SameLine();
-            ImGui::RadioButton("Multithreaded", &mode_selection, 1 << 1); ImGui::SameLine();
-            ImGui::RadioButton("Multithreaded SIMD", &mode_selection, 1 << 2);
+            ImGui::RadioButton("Single-threaded", &mode_selection, 1 << 0); ImGui::SameLine();
+            ImGui::RadioButton("Multi-threaded", &mode_selection, 1 << 1); ImGui::SameLine();
+            ImGui::RadioButton("Multi-threaded w/ SIMD", &mode_selection, 1 << 2);
             //ImGui::NewLine();
             
             ImGui::SeparatorText("Frametime visualizer");
@@ -267,7 +267,7 @@ namespace SM
             static float progress = 0.0f, progress_dir = 1.0f;
             if(animate)
             {
-                progress += progress_dir * 0.033f * ImGui::GetIO().DeltaTime;
+                progress += progress_dir * 0.02f * ImGui::GetIO().DeltaTime;
             }
             if(ImGui::Button("Benchmark"))
             {
@@ -322,6 +322,7 @@ namespace SM
 
             ImGui::SetNextWindowDockID(dockspace_id_, ImGuiCond_FirstUseEver);
             ImGui::Begin("Viewer", nullptr);
+            ImGui::SetCursorPos((ImGui::GetWindowSize() - ImVec2(texWidth_, texHeight_)) * 0.5f);
             ImGui::Image((void*)texture_, ImVec2(texWidth_, texHeight_));
             ImGui::End();
                                         
