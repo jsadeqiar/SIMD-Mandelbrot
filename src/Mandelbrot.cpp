@@ -391,8 +391,8 @@ namespace SM
         std::size_t simd_range = x_range - (x_range % batch_size);
         
         // send off portions that wont fill up a simd batch to be computed normally with multithreading
-        threadpool_.QueueTask([=, &dx, &dy]{
-            ThreadpoolCreateJob(simd_range, xE, yS, yE, dx, dy);
+        threadpool_.QueueTask([=]{
+            ThreadpoolCreateJob(xS + simd_range, xE, yS, yE, dx, dy);
         });
 
         double_batch zr, zi, cr, ci;
@@ -413,7 +413,7 @@ namespace SM
         // now to compute the main region of the thread that can be SIMD'd
         for(int y = yS; y < yE; y++)
         {
-            for(int x = xS; x < simd_range; x += batch_size)
+            for(int x = xS; x < (xS + simd_range); x += batch_size)
             {
                 curr_iter = double_batch::broadcast(0.0);
                 zr = double_batch::broadcast(0.0);
@@ -442,7 +442,7 @@ namespace SM
 
                     zr = newzr;
                     zi = newzi;
-
+                    //std::cout << combined_mask.mask() << '\n';
                 } while (combined_mask.mask());
                 
                 curr_iter.store_unaligned(&temp[0]);
