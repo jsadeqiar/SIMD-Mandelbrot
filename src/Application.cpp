@@ -167,6 +167,8 @@ namespace SM
                     mandelbrot_.ZoomPlot_In();
                 if(event.key.keysym.sym == SDLK_g)
                     mandelbrot_.ZoomPlot_Out();
+                if(event.key.keysym.sym == SDLK_r)
+                    mandelbrot_.ResetPlot();
             }
             }
 
@@ -205,13 +207,14 @@ namespace SM
             
             HelpMarker(
                 "Navigation can be made with W/A/S/D keys\n"
-                "Zooming in and out can be done with F and G"
+                "Zooming in and out can be done with F and G\n"
+                "Reset to original position with R"
             );
             
             if(ImGui::Button(" W "))
                 mandelbrot_.PanPlot(WEST);          ImGui::SameLine();
-            if(ImGui::Button("   "));
-            {};                                     ImGui::SameLine();
+            if(ImGui::Button(" R "))
+                mandelbrot_.ResetPlot();            ImGui::SameLine();
             if(ImGui::Button(" E "))
                 mandelbrot_.PanPlot(EAST);          ImGui::SameLine();
             if(ImGui::Button(" + "))

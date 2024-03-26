@@ -171,6 +171,17 @@ namespace SM
         return;
     }
 
+    void Mandelbrot::ResetPlot()
+    {
+        plot_real_s_ = -2.0;
+        plot_real_e_ = 1.0;
+        plot_imag_s_ = -1.0;
+        plot_imag_e_ = 1.0;
+
+        state_altered_ = true;
+        return;
+    }
+
     void Mandelbrot::IncreaseIterations()
     {
         if(current_iterations_limit_ < LIMIT_MAX_ITERATIONS_)

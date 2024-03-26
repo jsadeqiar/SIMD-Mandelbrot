@@ -66,6 +66,7 @@ namespace SM
         void PanPlot_East();
         void ZoomPlot_In();
         void ZoomPlot_Out();
+        void ResetPlot();
 
         // Setters
         void IncreaseIterations();
