@@ -50,7 +50,7 @@ namespace SM
         LIMIT_MIN_ITERATIONS_ = mandelbrot_.GetIterationLimitMin();
 
         // Initial cycle for texture
-        mandelbrot_.ComputeCycle_Basic();
+        mandelbrot_.ComputeCycle(BASIC);
 
         texture_ = SDL_CreateTexture(renderer_, SDL_PIXELFORMAT_RGBA32 , SDL_TEXTUREACCESS_STREAMING, texWidth_, texHeight_); 
 

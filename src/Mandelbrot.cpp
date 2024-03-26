@@ -396,7 +396,7 @@ namespace SM
         });
 
         double_batch zr, zi, cr, ci;
-        double_batch zr2, zi2, zr2subzi2, newzr;
+        double_batch zr2, zi2, zr2subzi2, newzr, zr2addzi2;
         double_batch zrmulzi, newzi;
         double_batch curr_iter;
 
@@ -413,6 +413,8 @@ namespace SM
         // now to compute the main region of the thread that can be SIMD'd
         for(int y = yS; y < yE; y++)
         {
+            ci = double_batch::broadcast(plot_imag_s_ + y * dy);
+            
             for(int x = xS; x < (xS + simd_range); x += batch_size)
             {
                 curr_iter = double_batch::broadcast(0.0);
@@ -423,8 +425,6 @@ namespace SM
                                          plot_real_s_ + (x + 2) * dx,
                                          plot_real_s_ + (x + 3) * dx);
 
-                ci = double_batch::broadcast(plot_imag_s_ + y * dy);
-
                 do
                 {
                     zr2         = xs::mul(zr, zr);
@@ -433,10 +433,12 @@ namespace SM
                     newzr       = xs::add(zr2subzi2, cr);
                     zrmulzi     = xs::mul(zr, zi);
                     newzi       = xs::fma(zrmulzi, two, ci);
+                    zr2addzi2   = xs::add(zr2, zi2);
 
-                    condition_mask1 = xs::lt(newzr, four);
+                    condition_mask1 = xs::lt(zr2addzi2, four);
                     condition_mask2 = xs::lt(curr_iter, current_iterations_limit);
-                    combined_mask   = xs::eq(condition_mask1, condition_mask2);
+                    combined_mask   = xs::bitwise_and(condition_mask1, condition_mask2);
+                    
                     
                     curr_iter = xs::incr_if(curr_iter, combined_mask);
 
@@ -447,12 +449,12 @@ namespace SM
                 
                 curr_iter.store_unaligned(&temp[0]);
 
-                for(int i : temp)
+                for(int i = 0; i < temp.size(); i++)
                 {
-                    if(i == current_iterations_limit_)
-                        framebuffer_.SetPixel(y, x, Color(0, 0, 0, 0));
+                    if(temp[i] == current_iterations_limit_)
+                        framebuffer_.SetPixel(y, x + i, Color(0, 0, 0, 0));
                     else
-                    framebuffer_.SetPixel(y, x, Color((int)(255 * ((double)i / (double)current_iterations_limit_)), 0, 0, 0));
+                    framebuffer_.SetPixel(y, x + i, Color((int)(255 * ((double)temp[i] / (double)current_iterations_limit_)), 0, 0, 0));
                 }
                 
             }
