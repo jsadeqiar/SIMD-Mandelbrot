@@ -52,6 +52,8 @@ target_include_directories(${CMAKE_PROJECT_NAME}_TESTS PRIVATE
     lib/xsimd/include
 )
 
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE ./ico/app.rc)
+
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE SDL3::SDL3)
 target_link_libraries(${CMAKE_PROJECT_NAME}_TESTS PRIVATE gtest)
 target_link_libraries(${CMAKE_PROJECT_NAME}_TESTS PRIVATE SDL3::SDL3)
